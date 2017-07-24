@@ -7,6 +7,7 @@ public class Article {
 	private String title;
 	private String blurb;
 	private Date articleDate;
+	private String body;
 	
 	
 	public String getTitle() {
@@ -26,6 +27,12 @@ public class Article {
 	}
 	public void setArticleDate(Date articleDate) {
 		this.articleDate = articleDate;
+	}
+	public String getBody() {
+		return body;
+	}
+	public void setBody(String body) {
+		this.body = body;
 	}
 	
 	

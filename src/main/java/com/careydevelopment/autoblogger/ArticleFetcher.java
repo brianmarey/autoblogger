@@ -2,11 +2,11 @@ package com.careydevelopment.autoblogger;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.careydevelopment.autoblogger.model.ArticleInfo;
+import com.careydevelopment.autoblogger.util.StringUtil;
 import com.careydevelopment.autoblogger.util.UrlUtil;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -58,7 +59,6 @@ public class ArticleFetcher {
 	
 	
 	private void getArticle(String link, ArticleInfo articleInfo) {
-		
 		MongoCollection<Document> articleCollection = db.getCollection("article");
 		Document exists = articleCollection.find(Filters.eq("url", link)).first();
 		
@@ -70,35 +70,27 @@ public class ArticleFetcher {
 	
 	private void persistArticle(String link, ArticleInfo articleInfo) {
 		String text = getTextFromLink(link, articleInfo);
-		String blurb = getBlurb(text, articleInfo);
+		String blurb = getBlurb(text);
 	}	
 	
 	
-	private String getBlurb(String text, ArticleInfo articleInfo) {
-		int start = -1;
-
-		start = text.indexOf(articleInfo.getTopDelimiter(), start + 1);
+	private String getBlurb(String text) {
+		String blurb = "";
+		String[] parts = text.split("\n");
 		
-		if (start > -1) {
-			int end = text.indexOf(articleInfo.getAfterContentDelimiter(), start + 1);
-			if (end > -1) {
-				String rawContent = text.substring(start + articleInfo.getTopDelimiter().length(), end);
-				rawContent = rawContent.trim();
-				try {
-					try (BufferedReader reader = new BufferedReader(new StringReader(rawContent))) {
-						try (Stream<String> stream = reader.lines()) {
-							stream.forEach(line -> {
-								System.err.println(line);
-							});
-						}
-					}
-				} catch (Exception e) {
-					LOGGER.error("Problem getting blurb from text " + text.substring(0, 40), e);
-				}
+		Stream<String> stream = Arrays.stream(parts);
+		StringBuilder blurbBuilder = new StringBuilder();
+		
+		stream.filter(line -> line.trim().length() > 1).forEach(line -> {
+			if (StringUtil.countNumberOfWords(blurbBuilder.toString()) < 120) {
+				blurbBuilder.append(line);
+				blurbBuilder.append("\n");
 			}
-		}
+        });
+				
+		blurb = blurbBuilder.toString();
 		
-		return "";
+		return blurb;
 	}
 	
 	
@@ -112,10 +104,11 @@ public class ArticleFetcher {
 	
 	private String getRawText(String fullHtml, ArticleInfo articleInfo) {
 		String content = UrlUtil.getContentBetweenDelimiter(fullHtml, articleInfo.getTopDelimiter(), articleInfo.getAfterContentDelimiter());
+		
 		content = UrlUtil.stripTags(content);
-
+		
 		String text = StringEscapeUtils.unescapeHtml(content);
-	
+
 		return text;
 	}
 
