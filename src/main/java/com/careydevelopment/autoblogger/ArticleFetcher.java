@@ -1,7 +1,6 @@
 package com.careydevelopment.autoblogger;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
@@ -13,13 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.AutoDetectParser;
-import org.apache.tika.sax.BodyContentHandler;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.careydevelopment.autoblogger.model.ArticleInfo;
+import com.careydevelopment.autoblogger.util.UrlUtil;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -48,57 +47,42 @@ public class ArticleFetcher {
 	
 	
 	private void getArticlesFromSource(Document d) {
-		String name = d.getString("name");
-		String url = d.getString("url");
-		double articleCount = d.getDouble("count");
-		String topDelimiter = d.getString("topdelimiter");
-		double topDelimiterCount = d.getDouble("topdelimitercount");
-		String afterContentDelimiter = d.getString("aftercontentdelimiter");
-		String tagsDelimiterTop = d.getString("tagsdelimitertop");
-		String tagsDelimiterBottom = d.getString("tagsdelimiterbottom");
-		String titleDelimiter = d.getString("titledelimiter");
-		String articleLinkStart = d.getString("articlelinkstart");
-		boolean appendRootUrl = d.getBoolean("appendrooturl");
+		ArticleInfo articleInfo = new ArticleInfo(d);
 		
-		List<String> links = getLinks(url, articleCount, titleDelimiter, articleLinkStart, appendRootUrl);
+		List<String> links = getLinks(articleInfo);
 		
 		//links.forEach((link) -> {
-			getArticle(links.get(0), topDelimiter, topDelimiterCount, afterContentDelimiter, tagsDelimiterTop, tagsDelimiterBottom);
+			getArticle(links.get(0), articleInfo);
 		//});
 	}
 	
 	
-	private void getArticle(String link, String topDelimiter, double topDelimiterCount, 
-		String afterContentDelimiter, String tagsDelimiterTop, String tagsDelimiterBottom) {
+	private void getArticle(String link, ArticleInfo articleInfo) {
 		
 		MongoCollection<Document> articleCollection = db.getCollection("article");
 		Document exists = articleCollection.find(Filters.eq("url", link)).first();
 		
 		if (exists == null) {
-			persistArticle(link, topDelimiter, topDelimiterCount, afterContentDelimiter, tagsDelimiterTop, tagsDelimiterBottom);
+			persistArticle(link, articleInfo);
 		}
 	}
 	
 	
-	private void persistArticle(String link, String topDelimiter, double topDelimiterCount, 
-		String afterContentDelimiter, String tagsDelimiterTop, String tagsDelimiterBottom) {
-		
-		String text = getTextFromLink(link);
-		String blurb = getBlurb(text, topDelimiter, topDelimiterCount, afterContentDelimiter);
+	private void persistArticle(String link, ArticleInfo articleInfo) {
+		String text = getTextFromLink(link, articleInfo);
+		String blurb = getBlurb(text, articleInfo);
 	}	
 	
 	
-	private String getBlurb(String text, String topDelimiter, double topDelimiterCount, String afterContentDelimiter) {
+	private String getBlurb(String text, ArticleInfo articleInfo) {
 		int start = -1;
 
-		for (double i=0; i <= topDelimiterCount;i++) {
-			start = text.indexOf(topDelimiter, start + 1);
-		}
+		start = text.indexOf(articleInfo.getTopDelimiter(), start + 1);
 		
 		if (start > -1) {
-			int end = text.indexOf(afterContentDelimiter, start + 1);
+			int end = text.indexOf(articleInfo.getAfterContentDelimiter(), start + 1);
 			if (end > -1) {
-				String rawContent = text.substring(start + topDelimiter.length(), end);
+				String rawContent = text.substring(start + articleInfo.getTopDelimiter().length(), end);
 				rawContent = rawContent.trim();
 				try {
 					try (BufferedReader reader = new BufferedReader(new StringReader(rawContent))) {
@@ -118,31 +102,29 @@ public class ArticleFetcher {
 	}
 	
 	
-	private String getTextFromLink(String url) {
-	    BodyContentHandler handler = new BodyContentHandler();
-
-		try {
-			URLConnection conn = new URL(url).openConnection();
-			conn.addRequestProperty("User-Agent", "Mozilla/4.76");
-								    
-		    AutoDetectParser parser = new AutoDetectParser();
-		    Metadata metadata = new Metadata();
-		    try (InputStream stream = conn.getInputStream()) {
-		        parser.parse(stream,handler,metadata);
-		    }
-		} catch (Exception e) {
-			LOGGER.error("Problem reading URL " + url, e);
-		}
+	private String getTextFromLink(String url, ArticleInfo articleInfo) {
+		String fullHtml = UrlUtil.getFullHtml(url);
+		String text = getRawText(fullHtml, articleInfo);
 		
-		return handler.toString();
+		return text;
 	}
+
 	
+	private String getRawText(String fullHtml, ArticleInfo articleInfo) {
+		String content = UrlUtil.getContentBetweenDelimiter(fullHtml, articleInfo.getTopDelimiter(), articleInfo.getAfterContentDelimiter());
+		content = UrlUtil.stripTags(content);
+
+		String text = StringEscapeUtils.unescapeHtml(content);
 	
-	private List<String> getLinks(String url, double articleCount, String titleDelimiter, String articleLinkStart, boolean appendRootUrl) {
+		return text;
+	}
+
+	
+	private List<String> getLinks(ArticleInfo articleInfo) {
 		List<String> links = new ArrayList<String>();
 		
 		try {
-			URLConnection conn = new URL(url).openConnection();
+			URLConnection conn = new URL(articleInfo.getUrl()).openConnection();
 			conn.addRequestProperty("User-Agent", "Mozilla/4.76");
 			
 			final AtomicInteger count = new AtomicInteger();
@@ -150,11 +132,11 @@ public class ArticleFetcher {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
 				try (Stream<String> stream = reader.lines()) {
 					
-					stream.filter(lineCriteria(titleDelimiter)).forEach(line ->
+					stream.filter(lineCriteria(articleInfo.getTitleDelimiter())).forEach(line ->
 					{
-						if (count.get() < articleCount) {
+						if (count.get() < articleInfo.getArticleCount()) {
 							line = line.trim();
-							String link = getLink(line,articleLinkStart,appendRootUrl,url);
+							String link = getLink(line,articleInfo.getArticleLinkStart(),articleInfo.getAppendRootUrl(),articleInfo.getUrl());
 							links.add(link);
 							count.incrementAndGet();
 						}
@@ -162,7 +144,7 @@ public class ArticleFetcher {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error("Problem reading URL " + url, e);
+			LOGGER.error("Problem reading URL " + articleInfo.getUrl(), e);
 		}
 		
 		return links;
