@@ -60,7 +60,21 @@ public class UrlUtil {
 	
 	
 	public static String stripTags(String html) {
+		html = removeScript(html);
+		
 		String stripped = html.replaceAll("\\<[^>]*>","");
 		return stripped;
+	}
+	
+	
+	public static String removeScript(String html) {
+		while (html.indexOf("<script>") > -1) {
+			int start = html.indexOf("<script");
+			int end = html.indexOf("</script>", start);
+			String textToRemove = html.substring(start, end + 9);
+		    html = html.replace(textToRemove, "");			
+		}
+		
+		return html;
 	}
 }

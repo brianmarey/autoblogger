@@ -15,6 +15,8 @@ public class ArticleInfo {
 	private String titleDelimiter;
 	private String articleLinkStart;
 	private Boolean appendRootUrl;
+	private String articleTitleStartDelimiter;
+	private String articleTitleEndDelimiter;
 	
 	
 	public ArticleInfo(Document d) {
@@ -29,6 +31,8 @@ public class ArticleInfo {
 		titleDelimiter = d.getString("titledelimiter");
 		articleLinkStart = d.getString("articlelinkstart");
 		appendRootUrl = d.getBoolean("appendrooturl");
+		articleTitleStartDelimiter = d.getString("articletitlestartdelimiter");
+		articleTitleEndDelimiter = d.getString("articletitleenddelimiter");
 	}
 	
 	
@@ -98,7 +102,25 @@ public class ArticleInfo {
 	public void setAppendRootUrl(Boolean appendRootUrl) {
 		this.appendRootUrl = appendRootUrl;
 	}
-	
-	
+
+
+	public String getArticleTitleStartDelimiter() {
+		return articleTitleStartDelimiter;
+	}
+
+
+	public void setArticleTitleStartDelimiter(String articleTitleStartDelimiter) {
+		this.articleTitleStartDelimiter = articleTitleStartDelimiter;
+	}
+
+
+	public String getArticleTitleEndDelimiter() {
+		return articleTitleEndDelimiter;
+	}
+
+
+	public void setArticleTitleEndDelimiter(String articleTitleEndDelimiter) {
+		this.articleTitleEndDelimiter = articleTitleEndDelimiter;
+	}
 
 }

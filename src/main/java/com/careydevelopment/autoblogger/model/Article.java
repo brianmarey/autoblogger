@@ -1,6 +1,7 @@
 package com.careydevelopment.autoblogger.model;
 
 import java.util.Date;
+import java.util.List;
 
 public class Article {
 
@@ -8,6 +9,9 @@ public class Article {
 	private String blurb;
 	private Date articleDate;
 	private String body;
+	private String link;
+	private List<String> tags;
+	private String blogName;
 	
 	
 	public String getTitle() {
@@ -33,6 +37,24 @@ public class Article {
 	}
 	public void setBody(String body) {
 		this.body = body;
+	}
+	public String getLink() {
+		return link;
+	}
+	public void setLink(String link) {
+		this.link = link;
+	}
+	public List<String> getTags() {
+		return tags;
+	}
+	public void setTags(List<String> tags) {
+		this.tags = tags;
+	}
+	public String getBlogName() {
+		return blogName;
+	}
+	public void setBlogName(String blogName) {
+		this.blogName = blogName;
 	}
 	
 	
