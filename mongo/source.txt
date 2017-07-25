@@ -32,3 +32,24 @@ aftercontentdelimiter: "<div class=\"article_body\">", titledelimiter:"<a class=
 tagsdelimiterbottom: "</div>", 
 articlelinkstart: "<a class=\"home_title\" href=\"", appendrooturl: true, articletitlestartdelimiter: "<h1>",
 articletitleenddelimiter: "</h1>"});
+
+db.source.insertOne(
+   {name: "The Federalist", url: "http://thefederalist.com", count: 5, topdelimiter: "<div class=\"entry-content long clearfix\">", 
+aftercontentdelimiter: "<div class=\"shortbio\">", titledelimiter:"<h2 class=\"entry-title\">", tagsdelimitertop: "<div class=\"tags\">", 
+tagsdelimiterbottom: "</div>", 
+articlelinkstart: "href=\"", appendrooturl: false, articletitlestartdelimiter: "<title>",
+articletitleenddelimiter: "</title>"});
+
+db.source.insertOne(
+   {name: "LifeNews", url: "http://www.lifenews.com", count: 5, topdelimiter: "<div class=\"article\">", 
+aftercontentdelimiter: "<div class=\"blueshare\"", titledelimiter:"<h4 class=\"title\">", tagsdelimitertop: "<div class=\"tags\">", 
+tagsdelimiterbottom: "</div>", 
+articlelinkstart: "href=\"", appendrooturl: false, articletitlestartdelimiter: "<title>",
+articletitleenddelimiter: " |"});
+
+db.source.insertOne(
+   {name: "NewsBusters", url: "https://www.newsbusters.org", count: 5, topdelimiter: "<div class=\"field-item\" property=\"content:encoded\">", 
+aftercontentdelimiter: "<section id=\"tags\">", titledelimiter:"<div class=\"headline\">", tagsdelimitertop: "<section id=\"tags\">", 
+tagsdelimiterbottom: "</section>", 
+articlelinkstart: "href=\"", appendrooturl: false, articletitlestartdelimiter: "<title>",
+articletitleenddelimiter: "</title>"});

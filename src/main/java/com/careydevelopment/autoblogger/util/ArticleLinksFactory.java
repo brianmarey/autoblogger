@@ -31,16 +31,19 @@ public class ArticleLinksFactory {
 			
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
 				try (Stream<String> stream = reader.lines()) {
+					LOGGER.debug("title delimiter is " + articleInfo.getTitleDelimiter());
 					
 					stream.filter(lineCriteria(articleInfo.getTitleDelimiter())).forEach(line ->
 					{
 						if (count.get() < articleInfo.getArticleCount()) {
-							LOGGER.debug("line is " + line);
 							line = line.trim();
+							LOGGER.debug("line is " + line);
 							String link = getLink(line,articleInfo.getArticleLinkStart(),articleInfo.getAppendRootUrl(),articleInfo.getUrl());
-							LOGGER.debug("adding " + link);
-							links.add(link);
-							count.incrementAndGet();
+							if (link.length() > 4) {
+								LOGGER.debug("adding " + link);
+								links.add(link);
+								count.incrementAndGet();								
+							}
 						}
 					});
 				}
@@ -72,7 +75,7 @@ public class ArticleLinksFactory {
 			}
 		}
 		
-		return link;
+		return link.trim();
 	}
 	
 	
