@@ -32,10 +32,43 @@ public class ArticleFactory {
 	
 	private static List<String> getTags(String fullHtml, ArticleInfo articleInfo) {
 		String tagSection = UrlUtil.getContentBetweenDelimiter(fullHtml, articleInfo.getTagsDelimiterTop(), articleInfo.getTagsDelimiterBottom());
-		tagSection = UrlUtil.stripTags(tagSection);
-
 		List<String> tags = new ArrayList<String>();
+		
+		if (tagSection.length() > 1) {
+			tagSection = UrlUtil.stripTags(tagSection).trim();
+
+			if (tagSection.indexOf(",") > -1) {
+				tags = getCommaDelimitedTags(tagSection);
+			} else {
+				tags = getCrDelimitedTags(tagSection);
+			}	
+		}
+						
+		return tags;
+	}
+
 	
+	private static List<String> getCommaDelimitedTags(String tagSection) {
+		List<String> tags = new ArrayList<String>();
+
+		String[] parts = tagSection.split(",");
+		Stream<String> stream = Arrays.stream(parts);
+		
+		stream.forEach(line -> {
+			line = line.trim();
+			if (line.length() > 1) {
+				tags.add(line);
+				LOGGER.debug("adding tag " + line);				
+			}
+        });
+				
+		return tags;
+	}
+	
+	
+	private static List<String> getCrDelimitedTags(String tagSection) {
+		List<String> tags = new ArrayList<String>();
+		
 		String[] parts = tagSection.split("\n");	
 		Stream<String> stream = Arrays.stream(parts);
 		
@@ -89,6 +122,7 @@ public class ArticleFactory {
 	
 	private static String getTitle(String fullHtml, ArticleInfo articleInfo) {
 		String title = UrlUtil.getContentBetweenDelimiter(fullHtml, articleInfo.getArticleTitleStartDelimiter(), articleInfo.getArticleTitleEndDelimiter());
+		title = UrlUtil.stripTags(title).trim();
 		title = StringEscapeUtils.unescapeHtml(title);
 		return title;
 	}
@@ -100,5 +134,4 @@ public class ArticleFactory {
 		String text = StringEscapeUtils.unescapeHtml(content);
 		return text;
 	}
-
 }

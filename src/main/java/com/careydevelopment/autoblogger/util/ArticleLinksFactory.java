@@ -35,8 +35,10 @@ public class ArticleLinksFactory {
 					stream.filter(lineCriteria(articleInfo.getTitleDelimiter())).forEach(line ->
 					{
 						if (count.get() < articleInfo.getArticleCount()) {
+							LOGGER.debug("line is " + line);
 							line = line.trim();
 							String link = getLink(line,articleInfo.getArticleLinkStart(),articleInfo.getAppendRootUrl(),articleInfo.getUrl());
+							LOGGER.debug("adding " + link);
 							links.add(link);
 							count.incrementAndGet();
 						}
@@ -52,14 +54,18 @@ public class ArticleLinksFactory {
 	
 	
 	private static String getLink(String line, String articleLinkStart, boolean appendRootUrl, String url) {
-		String link = null;
+		String link = "";
+		
+		//LOGGER.debug("articleLinkStart is " + articleLinkStart);
 		
 		int start = line.indexOf(articleLinkStart);
+		//LOGGER.debug("start is " + start);
 		if (start > -1) {
 			int end = line.indexOf("\"", start + articleLinkStart.length());
+			//LOGGER.debug("end is " + end);
 			if (end > -1) {
 				link = line.substring(start + articleLinkStart.length(), end);
-
+				//LOGGER.debug("link is " + link);
 				if (appendRootUrl) {
 					link = url + link;
 				}

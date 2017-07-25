@@ -1,0 +1,34 @@
+db.source.insertOne(
+   {name: "Hot Air", url: "http://hotair.com", count: 5, topdelimiter: "<div class=\"salem-content-injection-wrap\">", 
+aftercontentdelimiter: "</div><script>", titledelimiter:"<h2>", tagsdelimitertop: "Tags:", tagsdelimiterbottom: "</div>", 
+articlelinkstart: "href=\"", appendrooturl: true, articletitlestartdelimiter: "<h1 class=\"article text-capitalize\">",
+articletitleenddelimiter: "</h1>"});
+
+db.source.insertOne(
+   {name: "Breitbart", url: "http://breitbart.com", count: 7, topdelimiter: "<div class=\"entry-content\">", 
+aftercontentdelimiter: "<footer class=\"articlefooter\">", titledelimiter:"<h2 class=\"title\">", tagsdelimitertop: "<h3>Read More Stories About:</h3>", 
+tagsdelimiterbottom: "</p>", 
+articlelinkstart: "href=\"", appendrooturl: true, articletitlestartdelimiter: "<h1>",
+articletitleenddelimiter: "</h1>"});
+
+db.source.insertOne(
+   {name: "Gateway Pundit", url: "http://www.thegatewaypundit.com/", count: 5, topdelimiter: "<div class=\"entry-content\" itemprop=\"text\">", 
+aftercontentdelimiter: "<div class=\"essb_links", titledelimiter:"<h2 ", tagsdelimitertop: "<h3>Read More Stories About:</h3>", 
+tagsdelimiterbottom: "</p>", 
+articlelinkstart: "href=\"", appendrooturl: false, articletitlestartdelimiter: "<h1 class=\"entry-title\" itemprop=\"headline\">",
+articletitleenddelimiter: "</h1>"});
+
+
+db.source.insertOne(
+   {name: "National Review", url: "http://www.nationalreview.com", count: 5, topdelimiter: "<p class=\"article-ad-desktop-position\">", 
+aftercontentdelimiter: "<span class=\"biolineNR\">", titledelimiter:"data-url=\"", tagsdelimitertop: "Tags: ", 
+tagsdelimiterbottom: "</div>", 
+articlelinkstart: "data-url=\"", appendrooturl: false, articletitlestartdelimiter: "<h1 class=\"ap-0 article-header\" >",
+articletitleenddelimiter: "</h1>"});
+
+db.source.insertOne(
+   {name: "American Thinker", url: "http://www.americanthinker.com", count: 5, topdelimiter: "<div class=\"article_body top\">", 
+aftercontentdelimiter: "<div class=\"article_body\">", titledelimiter:"<a class=\"home_title\" href=\"", tagsdelimitertop: "Tags: ", 
+tagsdelimiterbottom: "</div>", 
+articlelinkstart: "<a class=\"home_title\" href=\"", appendrooturl: true, articletitlestartdelimiter: "<h1>",
+articletitleenddelimiter: "</h1>"});

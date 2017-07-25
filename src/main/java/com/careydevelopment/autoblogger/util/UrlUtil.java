@@ -68,10 +68,11 @@ public class UrlUtil {
 	
 	
 	public static String removeScript(String html) {
-		while (html.indexOf("<script>") > -1) {
+		while (html.indexOf("<script") > -1) {
 			int start = html.indexOf("<script");
 			int end = html.indexOf("</script>", start);
 			String textToRemove = html.substring(start, end + 9);
+			LOGGER.debug("removing script " + textToRemove);
 		    html = html.replace(textToRemove, "");			
 		}
 		
